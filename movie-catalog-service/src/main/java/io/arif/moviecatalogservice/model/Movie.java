@@ -1,10 +1,13 @@
-package io.arif.movieinfoservice.model;
+package io.arif.moviecatalogservice.model;
 
 public class Movie {
 
     private String id;
     private String name;
     private String desc;
+
+    public Movie() {
+    }
 
     public Movie(String id, String name, String desc) {
         this.id = id;
