@@ -3,6 +3,7 @@ package io.arif.moviecatalogservice.controller;
 import io.arif.moviecatalogservice.model.CatalogItem;
 import io.arif.moviecatalogservice.model.Movie;
 import io.arif.moviecatalogservice.model.Rating;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,10 +18,15 @@ import java.util.stream.Collectors;
 @RequestMapping("/catalog")
 public class MovieCatalogController {
 
+    private final RestTemplate restTemplate;
+
+    @Autowired
+    MovieCatalogController(final RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
     @GetMapping("/{userId}")
     public List<CatalogItem> getCatalog(@PathVariable("userId") int userId) {
-
-        RestTemplate restTemplate = new RestTemplate();
 
         List<Rating> ratings = Arrays.asList(
                 new Rating("1", 4),
