@@ -2,7 +2,6 @@ package io.arif.moviecatalogservice.controller;
 
 import io.arif.moviecatalogservice.model.CatalogItem;
 import io.arif.moviecatalogservice.model.Movie;
-import io.arif.moviecatalogservice.model.Rating;
 import io.arif.moviecatalogservice.model.UserRatings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,11 +27,11 @@ public class MovieCatalogController {
     @GetMapping("/{userId}")
     public List<CatalogItem> getCatalog(@PathVariable("userId") int userId) {
 
-        UserRatings userRatings = restTemplate.getForObject("http://localhost:8083/ratingsdata/users/" + userId,
+        UserRatings userRatings = restTemplate.getForObject("http://ratings-data-service/ratingsdata/users/" + userId,
                 UserRatings.class);
 
         return userRatings.getRatings().stream().map(rating -> {
-            Movie movie = restTemplate.getForObject("http://localhost:8082/movies/" + rating.getMovieId(), Movie.class);
+            Movie movie = restTemplate.getForObject("http://movie-info-service/movies/" + rating.getMovieId(), Movie.class);
 
             return new CatalogItem(movie.getName(), movie.getDesc(), rating.getRating());
         }).collect(Collectors.toList());
