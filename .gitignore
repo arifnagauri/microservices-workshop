@@ -2,3 +2,4 @@
 .mvn
 .DS_Store
 **/target
+**/.idea
