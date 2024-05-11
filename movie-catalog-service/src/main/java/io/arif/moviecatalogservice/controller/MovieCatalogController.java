@@ -5,6 +5,8 @@ import io.arif.moviecatalogservice.model.CatalogItem;
 import io.arif.moviecatalogservice.model.Movie;
 import io.arif.moviecatalogservice.model.Rating;
 import io.arif.moviecatalogservice.model.UserRatings;
+import io.arif.moviecatalogservice.service.MovieInfoService;
+import io.arif.moviecatalogservice.service.UserRatingsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,53 +22,20 @@ import java.util.stream.Collectors;
 @RequestMapping("/catalog")
 public class MovieCatalogController {
 
-    private final RestTemplate restTemplate;
+    private final UserRatingsService userRatingsService;
+    private final MovieInfoService movieInfoService;
 
     @Autowired
-    MovieCatalogController(final RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    MovieCatalogController(final UserRatingsService userRatingsService, final MovieInfoService movieInfoService) {
+        this.userRatingsService = userRatingsService;
+        this.movieInfoService = movieInfoService;
     }
 
     @GetMapping("/{userId}")
     public List<CatalogItem> getMovieCatalog(@PathVariable("userId") String userId) {
 
-        UserRatings userRatings = getUserRatings(userId);
+        UserRatings userRatings = userRatingsService.getUserRatings(userId);
 
-        return userRatings.getRatings().stream().map(rating -> getCatalogItem(rating)).collect(Collectors.toList());
-    }
-
-    @HystrixCommand(fallbackMethod = "getFallbackForUserRatings")
-    private UserRatings getUserRatings(String userId) {
-        UserRatings userRatings = restTemplate.getForObject("http://ratings-data-service/ratingsdata/users/" + userId,
-                UserRatings.class);
-        return userRatings;
-    }
-
-    @HystrixCommand(fallbackMethod = "getFallbackForCatalogItem")
-    private CatalogItem getCatalogItem(Rating rating) {
-        Movie movie = restTemplate.getForObject("http://movie-info-service/movies/" + rating.getMovieId(), Movie.class);
-        return new CatalogItem(movie.getName(), movie.getDesc(), rating.getRating());
-    }
-
-    public UserRatings getFallbackForUserRatings(String userId) {
-        UserRatings userRatings = new UserRatings();
-        userRatings.setUserId(userId);
-        userRatings.setRatings(Arrays.asList(
-                new Rating("0", 0)
-        ));
-        return userRatings;
-    }
-
-    public CatalogItem getFallbackForCatalogItem(Rating rating) {
-        return new CatalogItem("Movie name Not Found", "", rating.getRating());
+        return userRatings.getRatings().stream().map(rating -> movieInfoService.getCatalogItem(rating)).collect(Collectors.toList());
     }
 }
-
-//    private final WebClient.Builder webClientBuilder;
-
-//            Movie movie = webClientBuilder.build()
-//                    .get()
-//                    .uri("http://localhost:8082/movies/\" + rating.getMovieId()")
-//                    .retrieve()
-//                    .bodyToMono(Movie.class)
-//                    .block();
