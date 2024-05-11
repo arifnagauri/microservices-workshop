@@ -29,5 +29,6 @@ public class MovieInfoController {
         MovieSummary movieSummary = restTemplate.getForObject("https://api.themoviedb.org/3/movie/" + movieId +
                 "?api_key=" +  apiKey, MovieSummary.class);
         return new Movie(movieId, movieSummary.getTitle(), movieSummary.getOverview());
+//        return new Movie(movieId, "test", "test desc");
     }
 }
